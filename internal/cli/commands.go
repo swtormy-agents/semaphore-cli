@@ -90,20 +90,24 @@ func (a *app) projectsCmd() *cobra.Command {
 
 func (a *app) templatesCmd() *cobra.Command {
 	templates := &cobra.Command{Use: "templates", Short: "Job templates"}
-	var project int
+	var project string
 	list := &cobra.Command{
 		Use:   "list",
 		Short: "List templates in a project (GET /api/project/{id}/templates)",
 		Args:  cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			path, err := projectPath(project, "/templates")
+			projectID, err := parsePositiveID("--project", project)
+			if err != nil {
+				return err
+			}
+			path, err := projectPathFromID(projectID, "/templates")
 			if err != nil {
 				return err
 			}
 			return a.simpleGet(path, map[string]string{"sort": "name", "order": "asc"})(cmd, args)
 		},
 	}
-	list.Flags().IntVar(&project, "project", 0, "project id (required)")
+	list.Flags().StringVar(&project, "project", "", "project id (required)")
 	_ = list.MarkFlagRequired("project")
 	templates.AddCommand(list)
 	return templates
@@ -111,7 +115,7 @@ func (a *app) templatesCmd() *cobra.Command {
 
 func (a *app) tasksCmd() *cobra.Command {
 	tasks := &cobra.Command{Use: "task", Short: "Tasks"}
-	var project, taskID, templateID int
+	var project, taskID, templateID string
 	var writeFlag bool
 
 	list := &cobra.Command{
@@ -119,14 +123,18 @@ func (a *app) tasksCmd() *cobra.Command {
 		Short: "List tasks in a project (GET /api/project/{id}/tasks)",
 		Args:  cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			path, err := projectPath(project, "/tasks")
+			projectID, err := parsePositiveID("--project", project)
+			if err != nil {
+				return err
+			}
+			path, err := projectPathFromID(projectID, "/tasks")
 			if err != nil {
 				return err
 			}
 			return a.simpleGet(path, nil)(cmd, args)
 		},
 	}
-	list.Flags().IntVar(&project, "project", 0, "project id (required)")
+	list.Flags().StringVar(&project, "project", "", "project id (required)")
 	_ = list.MarkFlagRequired("project")
 
 	get := &cobra.Command{
@@ -134,18 +142,23 @@ func (a *app) tasksCmd() *cobra.Command {
 		Short: "Get a task (GET /api/project/{id}/tasks/{task_id})",
 		Args:  cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			if taskID <= 0 {
-				return usageErr("--id must be a positive task id")
+			projectID, err := parsePositiveID("--project", project)
+			if err != nil {
+				return err
 			}
-			path, err := projectPath(project, fmt.Sprintf("/tasks/%d", taskID))
+			id, err := parsePositiveID("--id", taskID)
+			if err != nil {
+				return err
+			}
+			path, err := projectTaskPath(projectID, id, "")
 			if err != nil {
 				return err
 			}
 			return a.simpleGet(path, nil)(cmd, args)
 		},
 	}
-	get.Flags().IntVar(&project, "project", 0, "project id (required)")
-	get.Flags().IntVar(&taskID, "id", 0, "task id (required)")
+	get.Flags().StringVar(&project, "project", "", "project id (required)")
+	get.Flags().StringVar(&taskID, "id", "", "task id (required)")
 	_ = get.MarkFlagRequired("project")
 	_ = get.MarkFlagRequired("id")
 
@@ -154,18 +167,23 @@ func (a *app) tasksCmd() *cobra.Command {
 		Short: "Get task output (GET /api/project/{id}/tasks/{task_id}/output)",
 		Args:  cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			if taskID <= 0 {
-				return usageErr("--id must be a positive task id")
+			projectID, err := parsePositiveID("--project", project)
+			if err != nil {
+				return err
 			}
-			path, err := projectPath(project, fmt.Sprintf("/tasks/%d/output", taskID))
+			id, err := parsePositiveID("--id", taskID)
+			if err != nil {
+				return err
+			}
+			path, err := projectTaskPath(projectID, id, "/output")
 			if err != nil {
 				return err
 			}
 			return a.simpleGet(path, nil)(cmd, args)
 		},
 	}
-	output.Flags().IntVar(&project, "project", 0, "project id (required)")
-	output.Flags().IntVar(&taskID, "id", 0, "task id (required)")
+	output.Flags().StringVar(&project, "project", "", "project id (required)")
+	output.Flags().StringVar(&taskID, "id", "", "task id (required)")
 	_ = output.MarkFlagRequired("project")
 	_ = output.MarkFlagRequired("id")
 
@@ -174,10 +192,15 @@ func (a *app) tasksCmd() *cobra.Command {
 		Short: "Start a task from a template (POST /api/project/{id}/tasks)",
 		Args:  cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			if templateID <= 0 {
-				return usageErr("--template must be a positive template id")
+			projectID, err := parsePositiveID("--project", project)
+			if err != nil {
+				return err
 			}
-			path, err := projectPath(project, "/tasks")
+			tmplID, err := parsePositiveID("--template", templateID)
+			if err != nil {
+				return err
+			}
+			path, err := projectPathFromID(projectID, "/tasks")
 			if err != nil {
 				return err
 			}
@@ -189,7 +212,7 @@ func (a *app) tasksCmd() *cobra.Command {
 			if err != nil {
 				return err
 			}
-			body := map[string]any{"template_id": templateID}
+			body := map[string]any{"template_id": tmplID}
 			if a.dryRun {
 				return a.emitValue(semaphore.DryRun(http.MethodPost, c.BaseURL, path, nil, body))
 			}
@@ -200,8 +223,8 @@ func (a *app) tasksCmd() *cobra.Command {
 			return a.emit(raw)
 		},
 	}
-	run.Flags().IntVar(&project, "project", 0, "project id (required)")
-	run.Flags().IntVar(&templateID, "template", 0, "template id (required)")
+	run.Flags().StringVar(&project, "project", "", "project id (required)")
+	run.Flags().StringVar(&templateID, "template", "", "template id (required)")
 	bindWriteFlag(run, &writeFlag)
 	_ = run.MarkFlagRequired("project")
 	_ = run.MarkFlagRequired("template")
@@ -212,20 +235,24 @@ func (a *app) tasksCmd() *cobra.Command {
 
 func (a *app) inventoriesCmd() *cobra.Command {
 	inventories := &cobra.Command{Use: "inventories", Short: "Inventories"}
-	var project int
+	var project string
 	list := &cobra.Command{
 		Use:   "list",
 		Short: "List inventories (GET /api/project/{id}/inventory)",
 		Args:  cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			path, err := projectPath(project, "/inventory")
+			projectID, err := parsePositiveID("--project", project)
+			if err != nil {
+				return err
+			}
+			path, err := projectPathFromID(projectID, "/inventory")
 			if err != nil {
 				return err
 			}
 			return a.simpleGet(path, map[string]string{"sort": "name", "order": "asc"})(cmd, args)
 		},
 	}
-	list.Flags().IntVar(&project, "project", 0, "project id (required)")
+	list.Flags().StringVar(&project, "project", "", "project id (required)")
 	_ = list.MarkFlagRequired("project")
 	inventories.AddCommand(list)
 	return inventories
@@ -233,20 +260,24 @@ func (a *app) inventoriesCmd() *cobra.Command {
 
 func (a *app) environmentsCmd() *cobra.Command {
 	environments := &cobra.Command{Use: "environments", Short: "Variable groups (environments)"}
-	var project int
+	var project string
 	list := &cobra.Command{
 		Use:   "list",
 		Short: "List environments (GET /api/project/{id}/environment)",
 		Args:  cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			path, err := projectPath(project, "/environment")
+			projectID, err := parsePositiveID("--project", project)
+			if err != nil {
+				return err
+			}
+			path, err := projectPathFromID(projectID, "/environment")
 			if err != nil {
 				return err
 			}
 			return a.simpleGet(path, map[string]string{"sort": "name", "order": "asc"})(cmd, args)
 		},
 	}
-	list.Flags().IntVar(&project, "project", 0, "project id (required)")
+	list.Flags().StringVar(&project, "project", "", "project id (required)")
 	_ = list.MarkFlagRequired("project")
 	environments.AddCommand(list)
 	return environments
@@ -254,13 +285,17 @@ func (a *app) environmentsCmd() *cobra.Command {
 
 func (a *app) keysCmd() *cobra.Command {
 	keys := &cobra.Command{Use: "keys", Short: "Access keys (metadata only)"}
-	var project int
+	var project string
 	list := &cobra.Command{
 		Use:   "list",
 		Short: "List access key names and ids (GET /api/project/{id}/keys)",
 		Args:  cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			path, err := projectPath(project, "/keys")
+			projectID, err := parsePositiveID("--project", project)
+			if err != nil {
+				return err
+			}
+			path, err := projectPathFromID(projectID, "/keys")
 			if err != nil {
 				return err
 			}
@@ -284,7 +319,7 @@ func (a *app) keysCmd() *cobra.Command {
 			return a.emit(safe)
 		},
 	}
-	list.Flags().IntVar(&project, "project", 0, "project id (required)")
+	list.Flags().StringVar(&project, "project", "", "project id (required)")
 	_ = list.MarkFlagRequired("project")
 	keys.AddCommand(list)
 	return keys

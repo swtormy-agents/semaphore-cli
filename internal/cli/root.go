@@ -192,7 +192,7 @@ func (a *app) wrapAPI(err error) error {
 func (a *app) rootCmd() *cobra.Command {
 	root := &cobra.Command{
 		Use:           "semaphore",
-		Short:         "Semaphore UI REST API from the shell (unofficial, community-built)",
+		Short:         "Semaphore UI REST API (unofficial, community-built, not affiliated with Semaphore UI)",
 		Long:          rootLong,
 		Version:       versionString(),
 		SilenceUsage:  true,

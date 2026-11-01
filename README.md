@@ -2,7 +2,7 @@
 
 > **Unofficial, community-built, not affiliated with Semaphore UI**
 
-`semaphore` is a small Go CLI for the [Semaphore UI](https://github.com/semaphoreui/semaphore) REST API. It targets humans and AI agents that want structured JSON (or tables) instead of wiring an MCP server — see [semaphoreui/semaphore#3126](https://github.com/semaphoreui/semaphore/issues/3126).
+`semaphore` is a small Go CLI for the [Semaphore UI](https://github.com/semaphoreui/semaphore) REST API. It is **unofficial, community-built, not affiliated with Semaphore UI**. It targets humans and AI agents that want structured JSON (or tables) instead of wiring an MCP server — see [semaphoreui/semaphore#3126](https://github.com/semaphoreui/semaphore/issues/3126).
 
 MIT licensed. Third-party notices in [NOTICE](NOTICE); release archives also ship `THIRD_PARTY_NOTICES` and `third_party_licenses/`.
 

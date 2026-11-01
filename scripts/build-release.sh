@@ -31,6 +31,13 @@ semaphore_go_licenses save "${SEMAPHORE_LICENSE_PACKAGE}" --save_path="${license
     echo "--- ${f#"${license_stage}/licenses/"} ---"
     cat "$f"
   done < <(find "${license_stage}/licenses" -type f \( -name 'LICENSE*' -o -name 'COPYING*' \) -print0 | sort -z)
+  echo
+  echo "=== Semaphore UI (documentation reference) ==="
+  echo "API endpoint documentation in docs/api-scope.md is derived from the Semaphore UI OpenAPI spec."
+  echo "Upstream: https://github.com/semaphoreui/semaphore — no Semaphore source code is bundled in this CLI."
+  echo
+  echo "--- licenses/upstream/semaphore-ui-LICENSE ---"
+  cat licenses/upstream/semaphore-ui-LICENSE
 } >"${license_stage}/THIRD_PARTY_NOTICES"
 
 mkdir -p "${license_stage}/apache-notices"

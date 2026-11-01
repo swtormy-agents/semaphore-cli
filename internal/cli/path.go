@@ -1,7 +1,6 @@
 package cli
 
 import (
-	"fmt"
 	"net/url"
 	"path"
 	"strings"
@@ -41,14 +40,6 @@ func normalizeAPIPath(raw string) (string, error) {
 		return "", usageErr("path must start with /api/")
 	}
 	return cleaned, nil
-}
-
-func projectPath(projectID int, suffix string) (string, error) {
-	if projectID <= 0 {
-		return "", usageErr("--project must be a positive project id")
-	}
-	p := fmt.Sprintf("/api/project/%d%s", projectID, suffix)
-	return normalizeAPIPath(p)
 }
 
 func parseQueryFlags(pairs []string) (url.Values, error) {

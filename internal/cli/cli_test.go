@@ -393,3 +393,28 @@ func TestMissingToken(t *testing.T) {
 		t.Fatalf("want exit 3 got %d", code)
 	}
 }
+
+func TestInvalidIDFlags(t *testing.T) {
+	srv := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		t.Fatalf("unexpected HTTP request during invalid ID validation: %s", r.URL.Path)
+	}))
+	defer srv.Close()
+	cases := [][]string{
+		{"templates", "list", "--project", "0"},
+		{"templates", "list", "--project", "-1"},
+		{"templates", "list", "--project", "1a"},
+		{"templates", "list", "--project", "1/2"},
+		{"templates", "list", "--project", "%2e"},
+		{"templates", "list", "--project", "18446744073709551616"},
+		{"task", "get", "--project", "1", "--id", "0"},
+		{"task", "get", "--project", "1", "--id", "-1"},
+		{"task", "get", "--project", "1", "--id", "1a"},
+		{"task", "run", "--project", "1", "--template", "0"},
+	}
+	for _, args := range cases {
+		code, _, errOut := runCLI(t, srv, args...)
+		if code != 2 {
+			t.Fatalf("args %v want exit 2 got %d stderr=%s", args, code, errOut)
+		}
+	}
+}
