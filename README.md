@@ -1,2 +1,58 @@
 # semaphore-cli
-Unofficial CLI for the Semaphore UI REST API (not affiliated with Semaphore UI)
+
+> **Unofficial, community-built, not affiliated with Semaphore UI**
+
+`semaphore` is a small Go CLI for the [Semaphore UI](https://github.com/semaphoreui/semaphore) REST API. It targets humans and AI agents that want structured JSON (or tables) instead of wiring an MCP server — see [semaphoreui/semaphore#3126](https://github.com/semaphoreui/semaphore/issues/3126).
+
+MIT licensed. Third-party notices in [NOTICE](NOTICE); release archives also ship `THIRD_PARTY_NOTICES` and `third_party_licenses/`.
+
+## Install
+
+Download a release archive from [GitHub Releases](https://github.com/swtormy-agents/semaphore-cli/releases) (Linux and Windows, amd64/arm64). Extract the binary and add it to your `PATH`.
+
+Or install from source with Go **1.26.10** (matches `go.mod`):
+
+```bash
+go install github.com/swtormy-agents/semaphore-cli/cmd/semaphore@latest
+```
+
+## Quick start
+
+```bash
+export SEMAPHORE_URL=https://semaphore.example.com
+export SEMAPHORE_API_TOKEN=...    # never pass on the command line
+
+semaphore health
+semaphore projects list
+semaphore templates list --project 1
+semaphore task list --project 1
+semaphore keys list --project 1
+```
+
+## Output
+
+- Default: JSON on stdout; one JSON error object on stderr
+- `--output table` for simple tabular views
+- `--jq '...'` to filter JSON (gojq)
+- `--pretty` to indent JSON
+
+## Safety
+
+- Never log or print the API token; `--dry-run` and errors redact it as `<API_TOKEN>`
+- Agents stay read-only. Mutating `semaphore api` calls and `task run` need `--write`, a TTY, and typing `write` when prompted
+- Exit codes: `0` ok, `1` runtime/API, `2` usage or config, `3` auth, `4` blocked
+
+See [docs/api-scope.md](docs/api-scope.md) for endpoints covered in v0.1.
+
+## Agent skills
+
+Bundled skill (also in [skills/semaphore/SKILL.md](skills/semaphore/SKILL.md)):
+
+```bash
+semaphore skill install --agent cursor
+semaphore skill print
+```
+
+## License
+
+MIT — see [LICENSE](LICENSE).

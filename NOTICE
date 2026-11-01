@@ -1,0 +1,9 @@
+semaphore-cli
+
+This product includes software developed by third parties:
+
+- Semaphore UI REST API documentation and OpenAPI descriptions
+  https://github.com/semaphoreui/semaphore
+  MIT (project) — see upstream repository
+
+This CLI is unofficial and not affiliated with Semaphore UI.
