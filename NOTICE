@@ -1,0 +1,12 @@
+semaphore-cli
+
+No Semaphore UI source code is included in this repository. API paths and scope
+in docs/api-scope.md are derived from the public OpenAPI specification at
+https://github.com/semaphoreui/semaphore (MIT license text included in release
+THIRD_PARTY_NOTICES under "Semaphore UI (documentation reference)").
+
+This product includes software developed by third parties (Go module dependencies).
+See release archive THIRD_PARTY_NOTICES and third_party_licenses/ for dependency
+license texts.
+
+This CLI is unofficial, community-built, not affiliated with Semaphore UI.
