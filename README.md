@@ -14,7 +14,7 @@ Download a release archive from [GitHub Releases](https://github.com/swtormy-age
 
 ```bash
 curl -fsSL -o semaphore_darwin_arm64.tar.gz \
-  https://github.com/swtormy-agents/semaphore-cli/releases/download/v0.1.0/semaphore_darwin_arm64.tar.gz
+  https://github.com/swtormy-agents/semaphore-cli/releases/latest/download/semaphore_darwin_arm64.tar.gz
 tar -xzf semaphore_darwin_arm64.tar.gz
 sudo install semaphore_darwin_arm64/semaphore /usr/local/bin/semaphore
 ```
