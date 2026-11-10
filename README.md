@@ -8,7 +8,18 @@ MIT licensed. Third-party notices in [NOTICE](NOTICE); release archives also shi
 
 ## Install
 
-Download a release archive from [GitHub Releases](https://github.com/swtormy-agents/semaphore-cli/releases) (Linux and Windows, amd64/arm64). Extract the binary and add it to your `PATH`.
+Download a release archive from [GitHub Releases](https://github.com/swtormy-agents/semaphore-cli/releases) (Linux, macOS, and Windows — amd64/arm64). Extract the binary and add it to your `PATH`.
+
+**macOS** (example: Apple Silicon):
+
+```bash
+curl -fsSL -o semaphore_darwin_arm64.tar.gz \
+  https://github.com/swtormy-agents/semaphore-cli/releases/latest/download/semaphore_darwin_arm64.tar.gz
+tar -xzf semaphore_darwin_arm64.tar.gz
+sudo install semaphore_darwin_arm64/semaphore /usr/local/bin/semaphore
+```
+
+Use `semaphore_darwin_amd64.tar.gz` on Intel Macs.
 
 Or install from source with Go **1.26.10** (matches `go.mod`):
 
